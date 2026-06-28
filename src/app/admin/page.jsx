@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "";
 const STORAGE_KEY = "zilo_admin_authed";
-const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL || "http://localhost:3000";
+const CLIENT_URL =
+  process.env.NEXT_PUBLIC_CLIENT_URL || "http://localhost:3000";
 
 const STATUSES = [
   "Order Received",
@@ -18,51 +19,92 @@ const STATUSES = [
 ];
 
 const STATUS_COLORS = {
-  "Order Received":   "bg-[#4A4A42]",
+  "Order Received": "bg-[#4A4A42]",
   "Payment Verified": "bg-[#1a5276]",
-  "Sourcing":         "bg-[#7d6608]",
+  Sourcing: "bg-[#7d6608]",
   "Out for Delivery": "bg-[#1e8449]",
-  "Delivered":        "bg-[#145a32]",
-  "Cancelled":        "bg-[#7A2E22]",
+  Delivered: "bg-[#145a32]",
+  Cancelled: "bg-[#7A2E22]",
 };
 
 // ── Quick-pick note presets for every notifiable status ─────────────
 const STATUS_QUICK_PICKS = {
   "Payment Verified": [
-    { label: "Normal",               note: "" },
-    { label: "⚡ Urgent — rushing",  note: "আপনার আর্জেন্ট অর্ডার — এখনই প্রসেস হচ্ছে।" },
-    { label: "Amount short",         note: "পেমেন্ট সামান্য কম এসেছে — বাকিটা ডেলিভারিতে দিন।" },
+    { label: "Normal", note: "" },
+    {
+      label: "⚡ Urgent — rushing",
+      note: "আপনার আর্জেন্ট অর্ডার — এখনই প্রসেস হচ্ছে।",
+    },
+    {
+      label: "Amount short",
+      note: "পেমেন্ট সামান্য কম এসেছে — বাকিটা ডেলিভারিতে দিন।",
+    },
   ],
-  "Sourcing": [
-    { label: "Searching now",        note: "" },
-    { label: "Found! Photo sent",    note: "আইটেম পাওয়া গেছে — WhatsApp-এ ছবি পাঠানো হয়েছে। অ্যাপ্রুভ করুন।" },
-    { label: "Purchased — in hand",  note: "আইটেম কেনা হয়েছে, ডেলিভারির জন্য প্রস্তুত।" },
-    { label: "No match — find alt?", note: "হুবহু আইটেম পাইনি — বিকল্প নিয়ে আলোচনা করতে চাই।" },
+  Sourcing: [
+    { label: "Searching now", note: "" },
+    {
+      label: "Found! Photo sent",
+      note: "আইটেম পাওয়া গেছে — WhatsApp-এ ছবি পাঠানো হয়েছে। অ্যাপ্রুভ করুন।",
+    },
+    {
+      label: "Purchased — in hand",
+      note: "আইটেম কেনা হয়েছে, ডেলিভারির জন্য প্রস্তুত।",
+    },
+    {
+      label: "No match — find alt?",
+      note: "হুবহু আইটেম পাইনি — বিকল্প নিয়ে আলোচনা করতে চাই।",
+    },
   ],
   "Out for Delivery": [
-    { label: "Today evening",        note: "" },
-    { label: "Within 1–2 hrs",       note: "আজ ১–২ ঘণ্টার মধ্যে পৌঁছাবে।" },
-    { label: "Tomorrow morning",     note: "আগামীকাল সকালে ডেলিভারি হবে।" },
+    { label: "Today evening", note: "" },
+    { label: "Within 1–2 hrs", note: "আজ ১–২ ঘণ্টার মধ্যে পৌঁছাবে।" },
+    { label: "Tomorrow morning", note: "আগামীকাল সকালে ডেলিভারি হবে।" },
   ],
-  "Delivered": [
-    { label: "All good",             note: "" },
-    { label: "Ask for feedback",     note: "সব কিছু ঠিকঠাক পেয়েছেন তো? জানালে খুশি হই।" },
-    { label: "Partial delivery",     note: "আইটেমের একটি অংশ আজ পৌঁছেছে — বাকি পরে দেওয়া হবে।" },
+  Delivered: [
+    { label: "All good", note: "" },
+    {
+      label: "Ask for feedback",
+      note: "সব কিছু ঠিকঠাক পেয়েছেন তো? জানালে খুশি হই।",
+    },
+    {
+      label: "Partial delivery",
+      note: "আইটেমের একটি অংশ আজ পৌঁছেছে — বাকি পরে দেওয়া হবে।",
+    },
   ],
-  "Cancelled": [
-    { label: "Payment not verified", note: "আপনার পেমেন্ট যাচাই করা যায়নি।",      isPaymentIssue: true  },
-    { label: "Wrong TxID",           note: "ট্রানজেকশন আইডি মেলেনি।",               isPaymentIssue: true  },
-    { label: "Item unavailable",     note: "দুঃখিত, আইটেমটি পাওয়া যায়নি।",        isPaymentIssue: false },
-    { label: "No photo approval",    note: "ছবি অ্যাপ্রুভ না করায় অর্ডার বাতিল।", isPaymentIssue: false },
-    { label: "Customer request",     note: "কাস্টমারের অনুরোধে বাতিল।",             isPaymentIssue: false },
+  Cancelled: [
+    {
+      label: "Payment not verified",
+      note: "আপনার পেমেন্ট যাচাই করা যায়নি।",
+      isPaymentIssue: true,
+    },
+    {
+      label: "Wrong TxID",
+      note: "ট্রানজেকশন আইডি মেলেনি।",
+      isPaymentIssue: true,
+    },
+    {
+      label: "Item unavailable",
+      note: "দুঃখিত, আইটেমটি পাওয়া যায়নি।",
+      isPaymentIssue: false,
+    },
+    {
+      label: "No photo approval",
+      note: "ছবি অ্যাপ্রুভ না করায় অর্ডার বাতিল।",
+      isPaymentIssue: false,
+    },
+    {
+      label: "Customer request",
+      note: "কাস্টমারের অনুরোধে বাতিল।",
+      isPaymentIssue: false,
+    },
   ],
 };
 
 // Maps each status to the "next positive step" for showing contextual picks
 const NEXT_POSITIVE = {
-  "Order Received":   "Payment Verified",
+  "Order Received": "Payment Verified",
   "Payment Verified": "Sourcing",
-  "Sourcing":         "Out for Delivery",
+  Sourcing: "Out for Delivery",
   "Out for Delivery": "Delivered",
 };
 
@@ -77,31 +119,42 @@ const isPaymentCancellation = (order, statusNote) => {
   if (order.status === "Order Received") return true;
   return noteHas(
     statusNote,
-    "payment", "পেমেন্ট", "verified", "ভেরিফাই",
-    "transaction", "ট্রানজেকশন", "not paid", "txid", "আইডি মেলেনি"
+    "payment",
+    "পেমেন্ট",
+    "verified",
+    "ভেরিফাই",
+    "transaction",
+    "ট্রানজেকশন",
+    "not paid",
+    "txid",
+    "আইডি মেলেনি",
   );
 };
 
 // ── Context-aware WhatsApp message builder ─────────────────────────
 const buildWhatsAppMessage = (order, newStatus, statusNote) => {
   const trackUrl = `${CLIENT_URL}/track?orderId=${order.orderId}&phone=${order.phone}`;
-  const note     = statusNote?.trim() ? `\n\n📝 ${statusNote.trim()}` : "";
-  const n        = statusNote || "";
+  const note = statusNote?.trim() ? `\n\n📝 ${statusNote.trim()}` : "";
+  const n = statusNote || "";
   const greeting = `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`;
 
   // ── Payment Verified ─────────────────────────────────────────────
   if (newStatus === "Payment Verified") {
-    const isUrgent  = order.isUrgent || noteHas(n, "আর্জেন্ট", "urgent", "rushing");
-    const isShort   = noteHas(n, "সামান্য কম", "amount short", "কম এসেছে");
+    const isUrgent =
+      order.isUrgent || noteHas(n, "আর্জেন্ট", "urgent", "rushing");
+    const isShort = noteHas(n, "সামান্য কম", "amount short", "কম এসেছে");
 
     return [
-      greeting, ``,
+      greeting,
+      ``,
       `✅ *পেমেন্ট নিশ্চিত হয়েছে*`,
       `আপনার ৳${order.amountPaid} পেমেন্ট (${order.paymentMethod}) ভেরিফাই করা হয়েছে।`,
-      ...(isShort ? [
-        ``,
-        `⚠️ *লক্ষ্য করুন:* পেমেন্ট সামান্য কম হয়েছে — বাকি পরিমাণ ডেলিভারির সময় দিতে হবে।`,
-      ] : []),
+      ...(isShort
+        ? [
+            ``,
+            `⚠️ *লক্ষ্য করুন:* পেমেন্ট সামান্য কম হয়েছে — বাকি পরিমাণ ডেলিভারির সময় দিতে হবে।`,
+          ]
+        : []),
       ``,
       `🛒 *আইটেম:* ${order.itemName} (${order.brandName})`,
       `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
@@ -116,27 +169,41 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
 
   // ── Sourcing ─────────────────────────────────────────────────────
   if (newStatus === "Sourcing") {
-    const foundPhoto = noteHas(n, "পাওয়া গেছে", "ছবি পাঠানো", "অ্যাপ্রুভ করুন", "photo sent", "found");
-    const purchased  = noteHas(n, "কেনা হয়েছে", "purchased", "প্রস্তুত", "in hand");
-    const noMatch    = noteHas(n, "বিকল্প", "alternative", "পাইনি", "no match");
+    const foundPhoto = noteHas(
+      n,
+      "পাওয়া গেছে",
+      "ছবি পাঠানো",
+      "অ্যাপ্রুভ করুন",
+      "photo sent",
+      "found",
+    );
+    const purchased = noteHas(
+      n,
+      "কেনা হয়েছে",
+      "purchased",
+      "প্রস্তুত",
+      "in hand",
+    );
+    const noMatch = noteHas(n, "বিকল্প", "alternative", "পাইনি", "no match");
 
     let header, body;
     if (foundPhoto) {
       header = `📸 *আইটেম পাওয়া গেছে — ছবি দেখুন!*`;
-      body   = `আপনার আইটেম খুঁজে পাওয়া গেছে। WhatsApp-এ ছবি পাঠানো হয়েছে।\nছবি দেখে অ্যাপ্রুভ দিন — তারপর কেনা হবে।`;
+      body = `আপনার আইটেম খুঁজে পাওয়া গেছে। WhatsApp-এ ছবি পাঠানো হয়েছে।\nছবি দেখে অ্যাপ্রুভ দিন — তারপর কেনা হবে।`;
     } else if (purchased) {
       header = `🛍️ *আইটেম কেনা হয়ে গেছে*`;
-      body   = `আপনার আইটেম কেনা হয়েছে এবং ডেলিভারির জন্য প্রস্তুত করা হচ্ছে।`;
+      body = `আপনার আইটেম কেনা হয়েছে এবং ডেলিভারির জন্য প্রস্তুত করা হচ্ছে।`;
     } else if (noMatch) {
       header = `🔄 *হুবহু আইটেম পাওয়া যাচ্ছে না*`;
-      body   = `আপনার নির্দিষ্ট আইটেমটি এই মুহূর্তে পাওয়া যাচ্ছে না।\nবিকল্প আইটেম নিয়ে আলাদাভাবে যোগাযোগ করা হবে।`;
+      body = `আপনার নির্দিষ্ট আইটেমটি এই মুহূর্তে পাওয়া যাচ্ছে না।\nবিকল্প আইটেম নিয়ে আলাদাভাবে যোগাযোগ করা হবে।`;
     } else {
       header = `🔍 *আইটেম খোঁজা শুরু হয়েছে*`;
-      body   = `আপনার আইটেম এখন সোর্স করা হচ্ছে।\nআইটেম পেলে WhatsApp-এ ছবি পাঠাবো — ছবি দেখে অ্যাপ্রুভ করুন।`;
+      body = `আপনার আইটেম এখন সোর্স করা হচ্ছে।\nআইটেম পেলে WhatsApp-এ ছবি পাঠাবো — ছবি দেখে অ্যাপ্রুভ করুন।`;
     }
 
     return [
-      greeting, ``,
+      greeting,
+      ``,
       header,
       body,
       ``,
@@ -149,17 +216,18 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
 
   // ── Out for Delivery ─────────────────────────────────────────────
   if (newStatus === "Out for Delivery") {
-    const soon     = noteHas(n, "ঘণ্টা", "hrs", "hour", "soon");
+    const soon = noteHas(n, "ঘণ্টা", "hrs", "hour", "soon");
     const tomorrow = noteHas(n, "আগামীকাল", "tomorrow");
 
     const timeMsg = tomorrow
       ? `আগামীকাল সকালে ডেলিভারি হবে ইনশাআল্লাহ।`
       : soon
-      ? `আজ ১–২ ঘণ্টার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`
-      : `আজকে সন্ধ্যার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`;
+        ? `আজ ১–২ ঘণ্টার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`
+        : `আজকে সন্ধ্যার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`;
 
     return [
-      greeting, ``,
+      greeting,
+      ``,
       `🏍️ *আপনার ডেলিভারি রওনা দিয়েছে!*`,
       `আপনার আইটেম এখন পথে আছে।`,
       ``,
@@ -176,11 +244,12 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
   // ── Delivered ────────────────────────────────────────────────────
   if (newStatus === "Delivered") {
     const askFeedback = noteHas(n, "ঠিকঠাক", "feedback", "জানালে");
-    const isPartial   = noteHas(n, "অংশ", "partial", "বাকি");
+    const isPartial = noteHas(n, "অংশ", "partial", "বাকি");
 
     if (isPartial) {
       return [
-        greeting, ``,
+        greeting,
+        ``,
         `📦 *আংশিক ডেলিভারি সম্পন্ন*`,
         `আপনার "${order.itemName}"-এর একটি অংশ আজ পৌঁছে গেছে।`,
         ``,
@@ -192,7 +261,8 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
     }
 
     return [
-      greeting, ``,
+      greeting,
+      ``,
       `✅ *ডেলিভারি সম্পন্ন হয়েছে!*`,
       `আপনার "${order.itemName}" পৌঁছে গেছে।`,
       ``,
@@ -209,7 +279,8 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
   if (newStatus === "Cancelled") {
     if (isPaymentCancellation(order, statusNote)) {
       return [
-        greeting, ``,
+        greeting,
+        ``,
         `❌ *অর্ডার বাতিল হয়েছে*`,
         `দুঃখিত, আপনার পেমেন্ট যাচাই করা সম্ভব হয়নি — তাই অর্ডারটি বাতিল করতে হয়েছে।`,
         ``,
@@ -225,7 +296,8 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
 
     // Payment was verified before cancel → refund applicable
     return [
-      greeting, ``,
+      greeting,
+      ``,
       `❌ *অর্ডার বাতিল হয়েছে*`,
       `দুঃখিত, আপনার অর্ডারটি বাতিল করতে হয়েছে।`,
       ``,
@@ -292,8 +364,16 @@ const AdminPage = () => {
 
   // ── DATA ─────────────────────────────────────────────────
   const [orders, setOrders] = useState([]);
-  const [stats, setStats] = useState({ total: 0, today: 0, pending: 0, revenue: 0 });
-  const [serviceStatus, setServiceStatus] = useState({ isOpen: true, message: "" });
+  const [stats, setStats] = useState({
+    total: 0,
+    today: 0,
+    pending: 0,
+    revenue: 0,
+  });
+  const [serviceStatus, setServiceStatus] = useState({
+    isOpen: true,
+    message: "",
+  });
   const [offMessage, setOffMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
@@ -321,8 +401,10 @@ const AdminPage = () => {
         setLoading(false);
         return;
       }
-      if (!ordersRes.ok) throw new Error(`Orders fetch failed: ${ordersRes.status}`);
-      if (!statsRes.ok) throw new Error(`Stats fetch failed: ${statsRes.status}`);
+      if (!ordersRes.ok)
+        throw new Error(`Orders fetch failed: ${ordersRes.status}`);
+      if (!statsRes.ok)
+        throw new Error(`Stats fetch failed: ${statsRes.status}`);
 
       const [ordersData, statsData, statusData] = await Promise.all([
         ordersRes.json(),
@@ -351,20 +433,25 @@ const AdminPage = () => {
     setUpdatingId(order._id);
 
     try {
-      const res = await fetch(`${SERVER}/api/admin/orders/${order._id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-key": ADMIN_KEY,
+      const res = await fetch(
+        `${SERVER}/api/admin/orders/${order._id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": ADMIN_KEY,
+          },
+          body: JSON.stringify({ status: newStatus, statusNote: note }),
         },
-        body: JSON.stringify({ status: newStatus, statusNote: note }),
-      });
+      );
       if (!res.ok) throw new Error(await res.text());
 
       setOrders((prev) =>
         prev.map((o) =>
-          o._id === order._id ? { ...o, status: newStatus, statusNote: note } : o
-        )
+          o._id === order._id
+            ? { ...o, status: newStatus, statusNote: note }
+            : o,
+        ),
       );
 
       if (WA_NOTIFY_STATUSES.has(newStatus)) {
@@ -387,7 +474,10 @@ const AdminPage = () => {
     try {
       const res = await fetch(`${SERVER}/api/admin/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": ADMIN_KEY,
+        },
         body: JSON.stringify({ isOpen: next, message: offMessage }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -403,8 +493,14 @@ const AdminPage = () => {
     try {
       const res = await fetch(`${SERVER}/api/admin/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ isOpen: serviceStatus.isOpen, message: offMessage }),
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": ADMIN_KEY,
+        },
+        body: JSON.stringify({
+          isOpen: serviceStatus.isOpen,
+          message: offMessage,
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
       setServiceStatus((s) => ({ ...s, message: offMessage }));
@@ -457,16 +553,21 @@ const AdminPage = () => {
   // ── DASHBOARD ────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[var(--color-paper)]">
-
       {/* Top bar */}
       <div className="border-b-[3px] border-[var(--color-ink)] px-4 py-4 flex items-center justify-between">
         <div>
-          <h1 className="font-display text-[22px] text-[var(--color-ink)] leading-none">ZILO Admin</h1>
-          <p className="text-[12px] text-[var(--color-olive)] mt-0.5">Noapara ⇄ Pahartali</p>
+          <h1 className="font-display text-[22px] text-[var(--color-ink)] leading-none">
+            ZILO Admin
+          </h1>
+          <p className="text-[12px] text-[var(--color-olive)] mt-0.5">
+            Noapara ⇄ Pahartali
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <div className={`w-2 h-2 rounded-full ${serviceStatus.isOpen ? "bg-green-500" : "bg-red-500"}`} />
+            <div
+              className={`w-2 h-2 rounded-full ${serviceStatus.isOpen ? "bg-green-500" : "bg-red-500"}`}
+            />
             <span className="text-[12px] text-[var(--color-olive)] hidden sm:inline">
               {serviceStatus.isOpen ? "Open" : "Paused"}
             </span>
@@ -490,19 +591,28 @@ const AdminPage = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-[var(--color-line)]">
         {[
           { label: "Total orders", value: stats.total ?? 0 },
-          { label: "Today",        value: stats.today ?? 0 },
-          { label: "Pending",      value: stats.pending ?? 0 },
-          { label: "Revenue (৳)",  value: `৳${(stats.revenue ?? 0).toLocaleString()}` },
+          { label: "Today", value: stats.today ?? 0 },
+          { label: "Pending", value: stats.pending ?? 0 },
+          {
+            label: "Revenue (৳)",
+            value: `৳${(stats.revenue ?? 0).toLocaleString()}`,
+          },
         ].map((s, ind) => (
-          <div key={ind} className="px-4 py-4 border-r border-[var(--color-line)] last:border-r-0">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--color-olive)]">{s.label}</p>
-            <p className="font-display text-[26px] text-[var(--color-ink)] mt-1 leading-none">{s.value}</p>
+          <div
+            key={ind}
+            className="px-4 py-4 border-r border-[var(--color-line)] last:border-r-0"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--color-olive)]">
+              {s.label}
+            </p>
+            <p className="font-display text-[26px] text-[var(--color-ink)] mt-1 leading-none">
+              {s.value}
+            </p>
           </div>
         ))}
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6">
-
         {/* Tabs */}
         <div className="flex border-b border-[var(--color-line)] mb-6">
           {["orders", "settings"].map((tab) => (
@@ -542,35 +652,53 @@ const AdminPage = () => {
                 className="px-3 py-2.5 border-[1.5px] border-[var(--color-ink)] bg-white text-[var(--color-ink)] text-[14px] focus:outline-none"
               >
                 <option value="all">All statuses</option>
-                {STATUSES.map((s, ind) => <option key={ind} value={s}>{s}</option>)}
+                {STATUSES.map((s, ind) => (
+                  <option key={ind} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
             </div>
 
             {loading ? (
               <div className="py-16 text-center">
-                <p className="font-mono text-[13px] text-[var(--color-olive)] animate-pulse">Loading orders…</p>
+                <p className="font-mono text-[13px] text-[var(--color-olive)] animate-pulse">
+                  Loading orders…
+                </p>
               </div>
             ) : filtered.length === 0 ? (
               <div className="border-2 border-dashed border-[var(--color-line)] py-14 text-center">
-                <p className="font-display text-[22px] text-[var(--color-ink)]">No orders found</p>
-                <p className="text-[13px] text-[var(--color-olive)] mt-1">Try a different filter or search term.</p>
+                <p className="font-display text-[22px] text-[var(--color-ink)]">
+                  No orders found
+                </p>
+                <p className="text-[13px] text-[var(--color-olive)] mt-1">
+                  Try a different filter or search term.
+                </p>
               </div>
             ) : (
               <div className="space-y-2.5">
                 {filtered.map((order, ind) => (
-                  <div key={ind} className="border-[1.5px] border-[var(--color-line)] bg-white">
-
+                  <div
+                    key={ind}
+                    className="border-[1.5px] border-[var(--color-line)] bg-white"
+                  >
                     {/* Collapsed row */}
                     <div
                       className="p-4 flex items-start gap-3 cursor-pointer hover:bg-[var(--color-kraft)] transition-colors"
-                      onClick={() => setExpandedId(expandedId === order._id ? null : order._id)}
+                      onClick={() =>
+                        setExpandedId(
+                          expandedId === order._id ? null : order._id,
+                        )
+                      }
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <span className="font-mono text-[12px] font-bold text-[var(--color-rust)]">
                             {order.orderId}
                           </span>
-                          <span className={`text-[10px] font-bold text-white px-2 py-0.5 ${STATUS_COLORS[order.status] || "bg-[#4A4A42]"}`}>
+                          <span
+                            className={`text-[10px] font-bold text-white px-2 py-0.5 ${STATUS_COLORS[order.status] || "bg-[#4A4A42]"}`}
+                          >
                             {order.status}
                           </span>
                           {order.isUrgent && (
@@ -579,7 +707,9 @@ const AdminPage = () => {
                             </span>
                           )}
                         </div>
-                        <p className="text-[14px] font-semibold text-[var(--color-ink)] truncate">{order.custName}</p>
+                        <p className="text-[14px] font-semibold text-[var(--color-ink)] truncate">
+                          {order.custName}
+                        </p>
                         <p className="text-[12.5px] text-[var(--color-olive)]">
                           {order.phone} · {order.itemName}
                         </p>
@@ -595,32 +725,75 @@ const AdminPage = () => {
                     {/* Expanded panel */}
                     {expandedId === order._id && (
                       <div className="border-t border-[var(--color-line)] p-4 bg-[var(--color-kraft)]">
-
                         {/* Order details */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-[13px] mb-5">
-                          <Detail label="Item" value={`${order.itemName} — ${order.brandName}`} />
-                          <Detail label="Type" value={order.isRepeat ? "Repeat item" : "New item"} />
-                          <Detail label="Delivery" value={`${order.union}, ${order.wardArea}, ${order.villageBari}${order.landmark ? ` (${order.landmark})` : ""}`} />
-                          <Detail label="Payment" value={`${order.paymentMethod} · TxID: ${order.transactionId}`} />
-                          <Detail label="Amount paid" value={`৳${order.amountPaid}`} />
-                          {order.budget && <Detail label="Budget" value={order.budget} />}
-                          {order.shopName && <Detail label="Shop" value={order.shopName} />}
-                          {order.lastPrice && <Detail label="Last price" value={order.lastPrice} />}
-                          {order.notes && <Detail label="Notes" value={order.notes} span />}
-                          {order.statusNote && <Detail label="Last status note" value={order.statusNote} span />}
+                          <Detail
+                            label="Item"
+                            value={`${order.itemName} — ${order.brandName}`}
+                          />
+                          <Detail
+                            label="Type"
+                            value={order.isRepeat ? "Repeat item" : "New item"}
+                          />
+                          <Detail
+                            label="Delivery"
+                            value={`${order.union}, ${order.wardArea}, ${order.villageBari}${order.landmark ? ` (${order.landmark})` : ""}`}
+                          />
+                          <Detail
+                            label="Payment"
+                            value={`${order.paymentMethod} · TxID: ${order.transactionId}`}
+                          />
+                          <Detail
+                            label="Amount paid"
+                            value={`৳${order.amountPaid}`}
+                          />
+                          {order.budget && (
+                            <Detail label="Budget" value={order.budget} />
+                          )}
+                          {order.shopName && (
+                            <Detail label="Shop" value={order.shopName} />
+                          )}
+                          {order.lastPrice && (
+                            <Detail
+                              label="Last price"
+                              value={order.lastPrice}
+                            />
+                          )}
+                          {order.notes && (
+                            <Detail label="Notes" value={order.notes} span />
+                          )}
+                          {order.statusNote && (
+                            <Detail
+                              label="Last status note"
+                              value={order.statusNote}
+                              span
+                            />
+                          )}
                           {order.refPhoto && (
                             <div className="sm:col-span-2">
-                              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-olive)] block mb-0.5">Ref photo</span>
-                              <a href={order.refPhoto} target="_blank" rel="noreferrer"
-                                className="text-[var(--color-rust)] underline break-all text-[12.5px]">
+                              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-olive)] block mb-0.5">
+                                Ref photo
+                              </span>
+                              <a
+                                href={order.refPhoto}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[var(--color-rust)] underline break-all text-[12.5px]"
+                              >
                                 {order.refPhoto}
                               </a>
                             </div>
                           )}
                           {order.screenshotUrl && (
                             <div className="sm:col-span-2">
-                              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-olive)] block mb-1">Payment screenshot</span>
-                              <a href={order.screenshotUrl} target="_blank" rel="noreferrer">
+                              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-olive)] block mb-1">
+                                Payment screenshot
+                              </span>
+                              <a
+                                href={order.screenshotUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
                                 <img
                                   src={order.screenshotUrl}
                                   alt="Payment screenshot"
@@ -638,30 +811,34 @@ const AdminPage = () => {
                           </p>
 
                           {/* Cancel reason quick-pick — shown only when order isn't already cancelled */}
-                          {order.status !== "Cancelled" && order.status !== "Delivered" && (
-                            <div className="mb-3 p-3 bg-[#fff4f2] border border-[var(--color-brick)]">
-                              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--color-brick)] mb-2">
-                                Quick cancel reason (fills note below)
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {CANCEL_REASONS.map((r) => (
-                                  <button
-                                    key={r.label}
-                                    onClick={() =>
-                                      setStatusNotes((prev) => ({ ...prev, [order._id]: r.note }))
-                                    }
-                                    className={`px-2.5 py-1 text-[11px] font-semibold border transition-colors ${
-                                      statusNotes[order._id] === r.note
-                                        ? "bg-[var(--color-brick)] text-white border-[var(--color-brick)]"
-                                        : "bg-white text-[var(--color-ink)] border-[var(--color-line)] hover:border-[var(--color-brick)]"
-                                    }`}
-                                  >
-                                    {r.label}
-                                  </button>
-                                ))}
+                          {order.status !== "Cancelled" &&
+                            order.status !== "Delivered" && (
+                              <div className="mb-3 p-3 bg-[#fff4f2] border border-[var(--color-brick)]">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--color-brick)] mb-2">
+                                  Quick cancel reason (fills note below)
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {STATUS_QUICK_PICKS["Cancelled"].map((r) => (
+                                    <button
+                                      key={r.label}
+                                      onClick={() =>
+                                        setStatusNotes((prev) => ({
+                                          ...prev,
+                                          [order._id]: r.note,
+                                        }))
+                                      }
+                                      className={`px-2.5 py-1 text-[11px] font-semibold border transition-colors ${
+                                        statusNotes[order._id] === r.note
+                                          ? "bg-[var(--color-brick)] text-white border-[var(--color-brick)]"
+                                          : "bg-white text-[var(--color-ink)] border-[var(--color-line)] hover:border-[var(--color-brick)]"
+                                      }`}
+                                    >
+                                      {r.label}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
 
                           {/* Note field */}
                           <div className="mb-3">
@@ -672,7 +849,10 @@ const AdminPage = () => {
                               type="text"
                               value={statusNotes[order._id] || ""}
                               onChange={(e) =>
-                                setStatusNotes((prev) => ({ ...prev, [order._id]: e.target.value }))
+                                setStatusNotes((prev) => ({
+                                  ...prev,
+                                  [order._id]: e.target.value,
+                                }))
                               }
                               placeholder="e.g. আপনার আইটেম পাওয়া গেছে, ছবি দেখুন"
                               className="w-full px-3 py-2 border-[1.5px] border-[var(--color-line)] bg-white text-[var(--color-ink)] text-[13px] focus:outline-none focus:border-[var(--color-rust)]"
@@ -707,7 +887,8 @@ const AdminPage = () => {
 
                           <p className="text-[11px] text-[var(--color-olive)] mt-2.5 flex items-center gap-1.5">
                             <span className="inline-block w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                            এই স্ট্যাটাসগুলো আপডেট করলে WhatsApp-এ কাস্টমারকে মেসেজ পাঠানো হবে।
+                            এই স্ট্যাটাসগুলো আপডেট করলে WhatsApp-এ কাস্টমারকে
+                            মেসেজ পাঠানো হবে।
                           </p>
                         </div>
 
@@ -718,7 +899,13 @@ const AdminPage = () => {
                           </p>
                           <div className="flex flex-wrap gap-2">
                             <button
-                              onClick={() => openWhatsApp(order, order.status, statusNotes[order._id] || "")}
+                              onClick={() =>
+                                openWhatsApp(
+                                  order,
+                                  order.status,
+                                  statusNotes[order._id] || "",
+                                )
+                              }
                               disabled={!WA_NOTIFY_STATUSES.has(order.status)}
                               className="px-3 py-1.5 text-[12px] font-semibold bg-[#25D366] text-white border border-[#1ebe5d] hover:bg-[#1ebe5d] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
@@ -739,7 +926,6 @@ const AdminPage = () => {
                             </a>
                           </div>
                         </div>
-
                       </div>
                     )}
                   </div>
@@ -752,13 +938,17 @@ const AdminPage = () => {
         {/* ── SETTINGS TAB ── */}
         {activeTab === "settings" && (
           <div className="max-w-lg space-y-5">
-            <h2 className="font-display text-[22px] text-[var(--color-ink)]">Service settings</h2>
+            <h2 className="font-display text-[22px] text-[var(--color-ink)]">
+              Service settings
+            </h2>
 
             <div className="border-[1.5px] border-[var(--color-ink)] bg-white p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="font-semibold text-[15px]">Service status</p>
-                  <p className="text-[13px] text-[var(--color-olive)]">Pause orders on off-days</p>
+                  <p className="text-[13px] text-[var(--color-olive)]">
+                    Pause orders on off-days
+                  </p>
                 </div>
                 <button
                   onClick={toggleService}
@@ -768,7 +958,9 @@ const AdminPage = () => {
                       : "border-[var(--color-brick)] text-[var(--color-brick)] hover:bg-[var(--color-brick)] hover:text-white"
                   }`}
                 >
-                  {serviceStatus.isOpen ? "✓ Open — click to pause" : "✕ Paused — click to open"}
+                  {serviceStatus.isOpen
+                    ? "✓ Open — click to pause"
+                    : "✕ Paused — click to open"}
                 </button>
               </div>
 
@@ -795,7 +987,8 @@ const AdminPage = () => {
             <div className="border-[1.5px] border-[var(--color-line)] p-5">
               <p className="font-semibold text-[15px] mb-1">Session</p>
               <p className="text-[13px] text-[var(--color-olive)] mb-3">
-                You are logged in as operator. Your session persists across page refreshes.
+                You are logged in as operator. Your session persists across page
+                refreshes.
               </p>
               <button
                 onClick={handleLogout}
