@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import PolicyModal from "@/components/PolicyModal";
+import PolicyModal from "@/components/PoloiciModal";
 import Header from "@/components/Header";
 import HowItWorks from "@/components/HowItWorks";
 import OrderForm from "@/components/OrderForm";
