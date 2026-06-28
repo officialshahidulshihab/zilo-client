@@ -1,4 +1,6 @@
-const Header = ({ isOpen, statusMessage }) => {
+import OrderWindowBanner from "./OrderWindowBanner";
+
+const Header = ({ status }) => {
   return (
     <header className="pt-7 pb-5 border-b-[3px] border-[var(--color-ink)]">
       <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-olive)] mb-2">
@@ -16,19 +18,7 @@ const Header = ({ isOpen, statusMessage }) => {
         </div>
       </div>
 
-      {isOpen ? (
-        <div className="mt-4 border-2 border-[var(--color-ink)] bg-[var(--color-kraft)] p-3.5 text-sm">
-          <strong className="block mb-1 text-[var(--color-ink)]">Same-day delivery, every order — our main promise.</strong>
-          <span className="text-[var(--color-olive)] text-[13px]">
-            Order before 12:00 PM and it's confirmed for delivery that same evening. Ordering after 12:00? Mark it "Urgent" — we'll confirm if there's still time.
-          </span>
-        </div>
-      ) : (
-        <div className="mt-4 border-2 border-[var(--color-brick)] bg-[#FBF1EC] p-3.5 text-sm">
-          <strong className="block mb-1 text-[var(--color-brick)]">⚠ Service is off today</strong>
-          <span className="text-[13px]">{statusMessage || "We're not running today. Check back tomorrow."}</span>
-        </div>
-      )}
+      <OrderWindowBanner initialStatus={status} />
     </header>
   );
 };

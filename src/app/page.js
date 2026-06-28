@@ -10,7 +10,13 @@ async function getServiceStatus() {
     const res = await fetch(`${SERVER}/api/status`, { cache: "no-store" });
     return await res.json();
   } catch {
-    return { isOpen: true, message: "" };
+    return {
+      isOpen: true,
+      message: "",
+      phase: "morning",
+      etaText: "today evening",
+      nextTransitionAt: null,
+    };
   }
 }
 
@@ -20,10 +26,10 @@ export default async function Home() {
   return (
     <main className="bg-[var(--color-paper)] min-h-screen">
       <div className="max-w-xl mx-auto px-4 pb-16">
-        <Header isOpen={status.isOpen} statusMessage={status.message} />
+        <Header status={status} />
         <HowItWorks />
         <Declaration />
-        <OrderForm isOpen={status.isOpen} />
+        <OrderForm isOpen={status.isOpen} etaText={status.etaText} />
       </div>
     </main>
   );

@@ -9,14 +9,13 @@ const BKASH_NAGAD = "01866996873";
 
 const UNIONS = ["Noapara", "Baguan", "Pahartali"];
 
-const OrderForm = ({ isOpen }) => {
+const OrderForm = ({ isOpen, etaText }) => {
   const [agreed, setAgreed] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
   const [isUrgent, setIsUrgent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [orderId, setOrderId] = useState("");
-  const [timeLeft, setTimeLeft] = useState("");
   const [screenshotFile, setScreenshotFile] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState("");
   const [refLinkStatus, setRefLinkStatus] = useState("");
@@ -27,24 +26,6 @@ const OrderForm = ({ isOpen }) => {
     paymentMethod: "", amountPaid: "", transactionId: "",
     notes: "",
   });
-
-  // Countdown to 12:00 PM
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const cutoff = new Date();
-      cutoff.setHours(12, 0, 0, 0);
-      if (now > cutoff) { setIsUrgent(true); setTimeLeft(""); return; }
-      const diff = cutoff - now;
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setTimeLeft(`${h}h ${m}m ${s}s until 12:00 PM cutoff`);
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -130,7 +111,7 @@ const OrderForm = ({ isOpen }) => {
         <div className="text-5xl mb-3">✅</div>
         <h2 className="font-display text-2xl text-[var(--color-ink)] mb-2">Order received!</h2>
         <p className="text-[14px] text-[var(--color-olive)] mb-4">
-          Your WhatsApp message has been sent. We'll confirm and deliver <strong>today</strong>.
+          Your WhatsApp message has been sent. We'll confirm and deliver <strong>{etaText || "soon"}</strong>.
         </p>
         <div className="font-mono text-[13px] bg-white border border-[var(--color-ink)] p-3.5 mb-5 text-left leading-loose">
           <div>Order ID: <strong>{orderId}</strong></div>
@@ -155,12 +136,6 @@ const OrderForm = ({ isOpen }) => {
     <section className="mt-9">
       <p className="font-mono text-[11.5px] tracking-[0.14em] uppercase text-[var(--color-rust)] mb-1">Your order</p>
       <h2 className="font-display text-[22px] text-[var(--color-ink)] mb-1">Place an order</h2>
-
-      {timeLeft && (
-        <div className="font-mono text-[12px] text-[var(--color-rust)] bg-[var(--color-kraft)] border border-[var(--color-line)] px-3 py-2 mb-5 inline-block">
-          ⏱ {timeLeft}
-        </div>
-      )}
 
       {/* Agree to Declaration */}
       <div className="mb-5 border-[1.5px] border-[var(--color-ink)] p-4 bg-white">
