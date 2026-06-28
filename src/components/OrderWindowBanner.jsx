@@ -93,6 +93,10 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
   if (!status) return null;
   const config = PHASE_CONFIG[status.phase] || PHASE_CONFIG["manual-closed"];
 
+  // Guard against a whitespace-only admin message rendering as an invisible
+  // blank box — only treat it as "present" if it has real visible content.
+  const hasCustomMessage = !!status.message && status.message.trim().length > 0;
+
   return (
     <div className="mt-4 border-2 border-[var(--color-ink)] bg-[var(--color-kraft)] p-3.5 text-sm">
       <span className={`inline-block text-[10px] font-bold text-white px-2 py-0.5 mb-2 ${config.badgeClass}`}>
@@ -100,9 +104,16 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
       </span>
 
       {status.phase === "manual-closed" ? (
-        <span className="text-[13px] text-[var(--color-brick)] font-semibold block">
-          {status.message || "We're not running today. Check back tomorrow."}
-        </span>
+        <>
+          <span className="text-[13px] text-[var(--color-brick)] font-semibold block">
+            {hasCustomMessage
+              ? status.message
+              : "We're not running today — back to normal hours soon."}
+          </span>
+          <p className="text-[11.5px] text-[var(--color-olive)] mt-2">
+            Once we're back online, our usual hours apply — see the schedule below.
+          </p>
+        </>
       ) : (
         <>
           <strong className="block mb-1 text-[var(--color-ink)] text-[14px]">
@@ -118,6 +129,21 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
           )}
         </>
       )}
+
+      {/* Always-visible mini schedule — so the customer understands the
+          full daily cycle no matter which state they happen to land on,
+          including a full manual closure. */}
+      <div className="mt-3 pt-3 border-t border-dashed border-[var(--color-line)] grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11.5px] text-[var(--color-olive)]">
+        <div className={status.phase === "morning" ? "font-bold text-[var(--color-ink)]" : ""}>
+          🟢 12 AM–12 PM<br />Order → today evening
+        </div>
+        <div className={status.phase === "midday-closed" ? "font-bold text-[var(--color-ink)]" : ""}>
+          🔴 12 PM–6 PM<br />Closed (sourcing & delivering)
+        </div>
+        <div className={status.phase === "evening" ? "font-bold text-[var(--color-ink)]" : ""}>
+          🌙 6 PM–12 AM<br />Order → tomorrow
+        </div>
+      </div>
     </div>
   );
 };
