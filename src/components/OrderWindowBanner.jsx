@@ -4,8 +4,6 @@ import { useState, useEffect, useRef } from "react";
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
-// Pure display formatting — the actual decision of whether orders are open
-// always comes from the backend (/api/status, re-checked again on submit).
 function formatRemaining(ms) {
   if (ms <= 0) return "00:00:00";
   const totalSeconds = Math.floor(ms / 1000);
@@ -16,37 +14,64 @@ function formatRemaining(ms) {
   return `${p(h)}:${p(m)}:${p(sec)}`;
 }
 
-const PHASE_CONFIG = {
-  morning: {
-    badge: "🟢 OPEN",
-    badgeClass: "bg-[#1e8449]",
-    headline: "Order now — get it delivered today evening.",
-    countdownLabel: "Order window closes in",
-  },
-  "midday-closed": {
-    badge: "🔴 PAUSED",
-    badgeClass: "bg-[var(--color-brick)]",
-    headline: "We're sourcing & delivering today's orders right now.",
-    countdownLabel: "Reopens at 6 PM in",
-  },
-  evening: {
-    badge: "🌙 OPEN",
-    badgeClass: "bg-[#1a5276]",
-    headline: "Order now — get it delivered tomorrow.",
-    countdownLabel: "New window opens at 12 PM in",
-  },
-  "manual-closed": {
-    badge: "⚠ CLOSED",
-    badgeClass: "bg-[var(--color-brick)]",
-    headline: null,
-    countdownLabel: null,
-  },
+// ── Schedule strip — always visible, highlights the current slot ──────────────
+const ScheduleStrip = ({ phase }) => {
+  const slots = [
+    {
+      key: "morning",
+      icon: "🟢",
+      time: "12 AM – 12 PM",
+      label: "Order → delivered today",
+    },
+    {
+      key: "midday-closed",
+      icon: "🏍️",
+      time: "12 PM – 6 PM",
+      label: "Out sourcing & delivering",
+    },
+    {
+      key: "evening",
+      icon: "🌙",
+      time: "6 PM – 12 AM",
+      label: "Order → delivered tomorrow",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 border-t border-dashed border-[var(--color-line)] mt-3 pt-3 gap-px">
+      {slots.map((slot) => {
+        const active = phase === slot.key;
+        return (
+          <div
+            key={slot.key}
+            className={`px-1.5 py-2 text-center transition-colors ${
+              active
+                ? "bg-[var(--color-ink)] text-white rounded-sm"
+                : "text-[var(--color-olive)]"
+            }`}
+          >
+            <div className="text-[14px] mb-0.5">{slot.icon}</div>
+            <div
+              className={`font-mono text-[9.5px] font-bold tracking-wide uppercase ${
+                active ? "text-white" : "text-[var(--color-ink)]"
+              }`}
+            >
+              {slot.time}
+            </div>
+            <div
+              className={`text-[10.5px] mt-0.5 leading-tight ${
+                active ? "text-white/80" : "text-[var(--color-olive)]"
+              }`}
+            >
+              {slot.label}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
-// initialStatus: the JSON shape returned by GET /api/status
-//   { isOpen, message, phase, etaText, nextTransitionAt }
-// onStatusChange: optional callback fired whenever this component refetches
-//   a fresh status (e.g. so the parent page can re-enable/disable OrderForm)
 const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
   const [status, setStatus] = useState(initialStatus);
   const [remaining, setRemaining] = useState(0);
@@ -60,22 +85,16 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
       refetchedRef.current = false;
       if (onStatusChange) onStatusChange(data);
     } catch {
-      // Network hiccup — keep showing the last known status. The order
-      // submit handler still gets re-validated server-side regardless.
+      // keep last known state — backend re-validates on submit anyway
     }
   };
 
-  // Tick every second purely off the fixed nextTransitionAt timestamp (no
-  // drift even if the tab was backgrounded). When it hits zero, refetch once
-  // to pick up the new phase from the backend — the single source of truth
-  // for exactly when the window changes.
   useEffect(() => {
     if (!status?.nextTransitionAt) {
       setRemaining(0);
       return;
     }
     const target = new Date(status.nextTransitionAt).getTime();
-
     const tick = () => {
       const diff = target - Date.now();
       setRemaining(diff);
@@ -91,61 +110,91 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
   }, [status?.nextTransitionAt]);
 
   if (!status) return null;
-  const config = PHASE_CONFIG[status.phase] || PHASE_CONFIG["manual-closed"];
 
-  // Guard against a whitespace-only admin message rendering as an invisible
-  // blank box — only treat it as "present" if it has real visible content.
-  const hasCustomMessage = !!status.message && status.message.trim().length > 0;
+  const { phase, message, nextTransitionAt } = status;
+  const hasCustomMessage = !!message && message.trim().length > 0;
 
-  return (
-    <div className="mt-4 border-2 border-[var(--color-ink)] bg-[var(--color-kraft)] p-3.5 text-sm">
-      <span className={`inline-block text-[10px] font-bold text-white px-2 py-0.5 mb-2 ${config.badgeClass}`}>
-        {config.badge}
-      </span>
-
-      {status.phase === "manual-closed" ? (
-        <>
-          <span className="text-[13px] text-[var(--color-brick)] font-semibold block">
-            {hasCustomMessage
-              ? status.message
-              : "We're not running today — back to normal hours soon."}
-          </span>
-          <p className="text-[11.5px] text-[var(--color-olive)] mt-2">
-            Once we're back online, our usual hours apply — see the schedule below.
-          </p>
-        </>
-      ) : (
-        <>
-          <strong className="block mb-1 text-[var(--color-ink)] text-[14px]">
-            {config.headline}
-          </strong>
-          {status.nextTransitionAt && (
-            <div className="flex items-baseline gap-2 mt-1.5">
-              <span className="text-[12px] text-[var(--color-olive)]">{config.countdownLabel}</span>
-              <span className="font-mono text-[15px] font-bold text-[var(--color-rust)] tabular-nums">
+  // ── OPEN: morning or evening ─────────────────────────────────────────────
+  if (phase === "morning" || phase === "evening") {
+    const isMorning = phase === "morning";
+    return (
+      <div className="mt-4 border-2 border-[#1e8449] bg-[#f0faf3] p-3.5">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <span className="inline-flex items-center gap-1.5 bg-[#1e8449] text-white text-[10px] font-bold px-2 py-0.5 mb-1.5 tracking-wide">
+              🟢 ACCEPTING ORDERS
+            </span>
+            <p className="text-[14px] font-semibold text-[#145a32]">
+              {isMorning
+                ? "Order now — delivered to your door this evening."
+                : "Order now — delivered to your door tomorrow."}
+            </p>
+          </div>
+          {nextTransitionAt && (
+            <div className="text-right shrink-0">
+              <p className="text-[10px] font-mono uppercase tracking-wide text-[#1e8449]">
+                Window closes in
+              </p>
+              <p className="font-mono text-[20px] font-bold text-[#145a32] tabular-nums leading-none">
                 {formatRemaining(remaining)}
-              </span>
+              </p>
             </div>
           )}
-        </>
-      )}
-
-      {/* Always-visible mini schedule — so the customer understands the
-          full daily cycle no matter which state they happen to land on,
-          including a full manual closure. */}
-      <div className="mt-3 pt-3 border-t border-dashed border-[var(--color-line)] grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11.5px] text-[var(--color-olive)]">
-        <div className={status.phase === "morning" ? "font-bold text-[var(--color-ink)]" : ""}>
-          🟢 12 AM–12 PM<br />Order → today evening
         </div>
-        <div className={status.phase === "midday-closed" ? "font-bold text-[var(--color-ink)]" : ""}>
-          🔴 12 PM–6 PM<br />Closed (sourcing & delivering)
-        </div>
-        <div className={status.phase === "evening" ? "font-bold text-[var(--color-ink)]" : ""}>
-          🌙 6 PM–12 AM<br />Order → tomorrow
-        </div>
+        <ScheduleStrip phase={phase} />
       </div>
-    </div>
-  );
+    )
+  }
+
+  // ── MIDDAY: out sourcing & delivering ───────────────────────────────────
+  if (phase === "midday-closed") {
+    return (
+      <div className="mt-4 border-2 border-[var(--color-ink)] bg-[var(--color-kraft)] p-3.5">
+        <span className="inline-flex items-center gap-1.5 bg-[var(--color-ink)] text-white text-[10px] font-bold px-2 py-0.5 mb-1.5 tracking-wide">
+          🏍️ OUT DELIVERING
+        </span>
+        <p className="text-[14px] font-semibold text-[var(--color-ink)]">
+          We&apos;re on the road right now — sourcing &amp; delivering today&apos;s orders.
+        </p>
+        <p className="text-[12.5px] text-[var(--color-olive)] mt-1">
+          New orders open again at <strong>6 PM</strong>. Come back then to order for tomorrow.
+        </p>
+        {nextTransitionAt && (
+          <div className="mt-2.5 flex items-baseline gap-2">
+            <span className="text-[11px] text-[var(--color-olive)] font-mono uppercase tracking-wide">
+              Back in
+            </span>
+            <span className="font-mono text-[18px] font-bold text-[var(--color-rust)] tabular-nums">
+              {formatRemaining(remaining)}
+            </span>
+          </div>
+        )}
+        <ScheduleStrip phase={phase} />
+      </div>
+    )
+  }
+
+  // ── MANUAL OFF-DAY ──────────────────────────────────────────────────────
+  if (phase === "manual-closed") {
+    return (
+      <div className="mt-4 border-2 border-[var(--color-brick)] bg-[#FBF1EC] p-3.5">
+        <span className="inline-flex items-center gap-1.5 bg-[var(--color-brick)] text-white text-[10px] font-bold px-2 py-0.5 mb-1.5 tracking-wide">
+          📅 NO SERVICE TODAY
+        </span>
+        <p className="text-[14px] font-semibold text-[var(--color-brick)]">
+          {hasCustomMessage
+            ? message
+            : "We're not running today — check back tomorrow."}
+        </p>
+        <p className="text-[12px] text-[var(--color-olive)] mt-1.5">
+          Once we&apos;re back, the normal daily schedule applies:
+        </p>
+        <ScheduleStrip phase={phase} />
+      </div>
+    )
+  }
+
+  return null
 };
 
 export default OrderWindowBanner;
