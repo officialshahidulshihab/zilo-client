@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
@@ -9,8 +9,8 @@ const BKASH_NAGAD = "01866996873";
 
 const UNIONS = ["Noapara", "Baguan", "Pahartali"];
 
-const OrderForm = ({ isOpen, etaText }) => {
-  const [agreed, setAgreed] = useState(false);
+const OrderForm = ({ isOpen, etaText, agreedFromOutside = false }) => {
+  const agreed = agreedFromOutside;
   const [isRepeat, setIsRepeat] = useState(false);
   const [isUrgent, setIsUrgent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -54,7 +54,7 @@ const OrderForm = ({ isOpen, etaText }) => {
       if (!form[key].trim()) { toast.error(`Please fill in: ${key}`); return false; }
     }
     if (!screenshotFile) { toast.error("Please attach a payment screenshot."); return false; }
-    if (!agreed) { toast.error("Please agree to the declaration first."); return false; }
+    if (!agreed) { toast.error("Please agree to the terms & policies first."); return false; }
     if (Number(form.amountPaid) < 500) { toast.error("Minimum order is ৳500."); return false; }
     return true;
   };
@@ -91,7 +91,7 @@ const OrderForm = ({ isOpen, etaText }) => {
           `Payment: ${form.paymentMethod} — ৳${form.amountPaid} — TxID: ${form.transactionId}`,
           form.notes ? `Notes: ${form.notes}` : "",
           "",
-          "I agree to the 10-point declaration.",
+          "Customer has agreed to ZILO terms & policies.",
         ].filter(Boolean);
 
         const waUrl = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join("\n"))}`;
@@ -129,29 +129,13 @@ const OrderForm = ({ isOpen, etaText }) => {
           Keep your Order ID safe. Use it to track your delivery.
         </p>
       </div>
-    );
+    )
   }
 
   return (
     <section className="mt-9">
       <p className="font-mono text-[11.5px] tracking-[0.14em] uppercase text-[var(--color-rust)] mb-1">Your order</p>
-      <h2 className="font-display text-[22px] text-[var(--color-ink)] mb-1">Place an order</h2>
-
-      {/* Agree to Declaration */}
-      <div className="mb-5 border-[1.5px] border-[var(--color-ink)] p-4 bg-white">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="agreeDecl"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="w-5 h-5 mt-0.5 shrink-0 accent-[var(--color-brick)]"
-          />
-          <label htmlFor="agreeDecl" className="text-[13.5px] font-semibold cursor-pointer">
-            I have read the 10-point declaration above and agree to all terms and policies.
-          </label>
-        </div>
-      </div>
+      <h2 className="font-display text-[22px] text-[var(--color-ink)] mb-5">Place an order</h2>
 
       {/* Customer details */}
       <div className="mb-5">
@@ -305,7 +289,7 @@ const OrderForm = ({ isOpen, etaText }) => {
             : "bg-[#b9ad8f] cursor-not-allowed"
         }`}
       >
-        {submitting ? "Sending…" : !agreed ? "Agree to the declaration above to continue" : "Place order & open WhatsApp"}
+        {submitting ? "Sending…" : !agreed ? "Read & agree to terms above to continue" : "Place order & open WhatsApp"}
       </button>
       {!isOpen && (
         <p className="text-[12.5px] text-[var(--color-brick)] text-center mt-2">
@@ -313,7 +297,7 @@ const OrderForm = ({ isOpen, etaText }) => {
         </p>
       )}
     </section>
-  );
+  )
 };
 
 const Field = ({ label, name, type = "text", placeholder, value, onChange }) => (

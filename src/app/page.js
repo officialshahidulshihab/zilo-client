@@ -1,7 +1,4 @@
-import OrderForm from "@/components/OrderForm";
-import Header from "@/components/Header";
-import HowItWorks from "@/components/HowItWorks";
-import Declaration from "@/components/Declaration";
+import HomeClient from "@/components/HomeClient";
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
 
@@ -22,15 +19,5 @@ async function getServiceStatus() {
 
 export default async function Home() {
   const status = await getServiceStatus();
-
-  return (
-    <main className="bg-[var(--color-paper)] min-h-screen">
-      <div className="max-w-xl mx-auto px-4 pb-16">
-        <Header status={status} />
-        <HowItWorks />
-        <Declaration />
-        <OrderForm isOpen={status.isOpen} etaText={status.etaText} />
-      </div>
-    </main>
-  );
+  return <HomeClient status={status} />
 }
