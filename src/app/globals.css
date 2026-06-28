@@ -1,26 +1,57 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #14213D;
+  --color-rust: #8B3A1F;
+  --color-kraft: #EDE5D3;
+  --color-paper: #FBF7EF;
+  --color-brick: #7A2E22;
+  --color-olive: #4A4A42;
+  --color-line: #cfc4a8;
+  --color-background: #FBF7EF;
+  --color-foreground: #14213D;
+  --color-primary: #8B3A1F;
+  --color-muted: #EDE5D3;
+  --color-muted-foreground: #4A4A42;
+  --color-border: #cfc4a8;
+  --color-card: #EDE5D3;
+}
+
+.dark {
+  --color-background: #0f0e0c;
+  --color-foreground: #f0ece3;
+  --color-primary: #b05a38;
+  --color-muted: #1e1c18;
+  --color-muted-foreground: #9a9485;
+  --color-border: #2e2b24;
+  --color-card: #1a1814;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--color-ink);
+  --color-rust: var(--color-rust);
+  --color-kraft: var(--color-kraft);
+  --color-paper: var(--color-paper);
+  --color-brick: var(--color-brick);
+  --color-olive: var(--color-olive);
+  --color-line: var(--color-line);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-primary: var(--color-primary);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-border: var(--color-border);
+  --color-card: var(--color-card);
+  --font-mono: "IBM Plex Mono", monospace;
+  --font-display: "Special Elite", monospace;
+  --font-sans: "IBM Plex Sans", sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  line-height: 1.5;
 }
