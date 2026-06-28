@@ -26,43 +26,140 @@ const STATUS_COLORS = {
   "Cancelled":        "bg-[#7A2E22]",
 };
 
-// ── WhatsApp message builder ──────────────────────────────
+// ── Quick-pick note presets for every notifiable status ─────────────
+const STATUS_QUICK_PICKS = {
+  "Payment Verified": [
+    { label: "Normal",               note: "" },
+    { label: "⚡ Urgent — rushing",  note: "আপনার আর্জেন্ট অর্ডার — এখনই প্রসেস হচ্ছে।" },
+    { label: "Amount short",         note: "পেমেন্ট সামান্য কম এসেছে — বাকিটা ডেলিভারিতে দিন।" },
+  ],
+  "Sourcing": [
+    { label: "Searching now",        note: "" },
+    { label: "Found! Photo sent",    note: "আইটেম পাওয়া গেছে — WhatsApp-এ ছবি পাঠানো হয়েছে। অ্যাপ্রুভ করুন।" },
+    { label: "Purchased — in hand",  note: "আইটেম কেনা হয়েছে, ডেলিভারির জন্য প্রস্তুত।" },
+    { label: "No match — find alt?", note: "হুবহু আইটেম পাইনি — বিকল্প নিয়ে আলোচনা করতে চাই।" },
+  ],
+  "Out for Delivery": [
+    { label: "Today evening",        note: "" },
+    { label: "Within 1–2 hrs",       note: "আজ ১–২ ঘণ্টার মধ্যে পৌঁছাবে।" },
+    { label: "Tomorrow morning",     note: "আগামীকাল সকালে ডেলিভারি হবে।" },
+  ],
+  "Delivered": [
+    { label: "All good",             note: "" },
+    { label: "Ask for feedback",     note: "সব কিছু ঠিকঠাক পেয়েছেন তো? জানালে খুশি হই।" },
+    { label: "Partial delivery",     note: "আইটেমের একটি অংশ আজ পৌঁছেছে — বাকি পরে দেওয়া হবে।" },
+  ],
+  "Cancelled": [
+    { label: "Payment not verified", note: "আপনার পেমেন্ট যাচাই করা যায়নি।",      isPaymentIssue: true  },
+    { label: "Wrong TxID",           note: "ট্রানজেকশন আইডি মেলেনি।",               isPaymentIssue: true  },
+    { label: "Item unavailable",     note: "দুঃখিত, আইটেমটি পাওয়া যায়নি।",        isPaymentIssue: false },
+    { label: "No photo approval",    note: "ছবি অ্যাপ্রুভ না করায় অর্ডার বাতিল।", isPaymentIssue: false },
+    { label: "Customer request",     note: "কাস্টমারের অনুরোধে বাতিল।",             isPaymentIssue: false },
+  ],
+};
+
+// Maps each status to the "next positive step" for showing contextual picks
+const NEXT_POSITIVE = {
+  "Order Received":   "Payment Verified",
+  "Payment Verified": "Sourcing",
+  "Sourcing":         "Out for Delivery",
+  "Out for Delivery": "Delivered",
+};
+
+// Keyword detector helper
+const noteHas = (note, ...keywords) => {
+  const hay = (note || "").toLowerCase();
+  return keywords.some((k) => hay.includes(k.toLowerCase()));
+};
+
+// Detect payment-issue cancellation: order never left "Order Received" OR note says payment/tx problem
+const isPaymentCancellation = (order, statusNote) => {
+  if (order.status === "Order Received") return true;
+  return noteHas(
+    statusNote,
+    "payment", "পেমেন্ট", "verified", "ভেরিফাই",
+    "transaction", "ট্রানজেকশন", "not paid", "txid", "আইডি মেলেনি"
+  );
+};
+
+// ── Context-aware WhatsApp message builder ─────────────────────────
 const buildWhatsAppMessage = (order, newStatus, statusNote) => {
   const trackUrl = `${CLIENT_URL}/track?orderId=${order.orderId}&phone=${order.phone}`;
-  const note = statusNote?.trim() ? `\n\n📝 ${statusNote.trim()}` : "";
+  const note     = statusNote?.trim() ? `\n\n📝 ${statusNote.trim()}` : "";
+  const n        = statusNote || "";
+  const greeting = `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`;
 
-  const messages = {
-    "Payment Verified": [
-      `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`,
-      ``,
+  // ── Payment Verified ─────────────────────────────────────────────
+  if (newStatus === "Payment Verified") {
+    const isUrgent  = order.isUrgent || noteHas(n, "আর্জেন্ট", "urgent", "rushing");
+    const isShort   = noteHas(n, "সামান্য কম", "amount short", "কম এসেছে");
+
+    return [
+      greeting, ``,
       `✅ *পেমেন্ট নিশ্চিত হয়েছে*`,
       `আপনার ৳${order.amountPaid} পেমেন্ট (${order.paymentMethod}) ভেরিফাই করা হয়েছে।`,
-      ``,
-      `🛒 *অর্ডার:* ${order.itemName} (${order.brandName})`,
-      `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
-      ``,
-      `এখন আপনার আইটেম সোর্স করার কাজ শুরু হবে। আমরা আইটেম খুঁজে পেলে ছবি পাঠাবো।`,
-      ``,
-      `📦 ট্র্যাক করুন: ${trackUrl}`,
-    ],
-
-    "Sourcing": [
-      `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`,
-      ``,
-      `🔍 *আইটেম খোঁজা শুরু হয়েছে*`,
-      `আপনার অর্ডার এখন সোর্স করা হচ্ছে।`,
+      ...(isShort ? [
+        ``,
+        `⚠️ *লক্ষ্য করুন:* পেমেন্ট সামান্য কম হয়েছে — বাকি পরিমাণ ডেলিভারির সময় দিতে হবে।`,
+      ] : []),
       ``,
       `🛒 *আইটেম:* ${order.itemName} (${order.brandName})`,
       `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
       ``,
-      `আইটেম পেলে আমরা ছবি পাঠাবো — ছবি দেখে অ্যাপ্রুভ করুন তারপরে কেনা হবে।`,
+      isUrgent
+        ? `⚡ আপনার অর্ডার আর্জেন্ট — এখনই সোর্স করার কাজ শুরু হচ্ছে।`
+        : `এখন সোর্স করার কাজ শুরু হবে। আইটেম খুঁজে পেলে WhatsApp-এ ছবি পাঠাবো।`,
       ``,
       `📦 ট্র্যাক করুন: ${trackUrl}`,
-    ],
+    ];
+  }
 
-    "Out for Delivery": [
-      `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`,
+  // ── Sourcing ─────────────────────────────────────────────────────
+  if (newStatus === "Sourcing") {
+    const foundPhoto = noteHas(n, "পাওয়া গেছে", "ছবি পাঠানো", "অ্যাপ্রুভ করুন", "photo sent", "found");
+    const purchased  = noteHas(n, "কেনা হয়েছে", "purchased", "প্রস্তুত", "in hand");
+    const noMatch    = noteHas(n, "বিকল্প", "alternative", "পাইনি", "no match");
+
+    let header, body;
+    if (foundPhoto) {
+      header = `📸 *আইটেম পাওয়া গেছে — ছবি দেখুন!*`;
+      body   = `আপনার আইটেম খুঁজে পাওয়া গেছে। WhatsApp-এ ছবি পাঠানো হয়েছে।\nছবি দেখে অ্যাপ্রুভ দিন — তারপর কেনা হবে।`;
+    } else if (purchased) {
+      header = `🛍️ *আইটেম কেনা হয়ে গেছে*`;
+      body   = `আপনার আইটেম কেনা হয়েছে এবং ডেলিভারির জন্য প্রস্তুত করা হচ্ছে।`;
+    } else if (noMatch) {
+      header = `🔄 *হুবহু আইটেম পাওয়া যাচ্ছে না*`;
+      body   = `আপনার নির্দিষ্ট আইটেমটি এই মুহূর্তে পাওয়া যাচ্ছে না।\nবিকল্প আইটেম নিয়ে আলাদাভাবে যোগাযোগ করা হবে।`;
+    } else {
+      header = `🔍 *আইটেম খোঁজা শুরু হয়েছে*`;
+      body   = `আপনার আইটেম এখন সোর্স করা হচ্ছে।\nআইটেম পেলে WhatsApp-এ ছবি পাঠাবো — ছবি দেখে অ্যাপ্রুভ করুন।`;
+    }
+
+    return [
+      greeting, ``,
+      header,
+      body,
       ``,
+      `🛒 *আইটেম:* ${order.itemName} (${order.brandName})`,
+      `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
+      ``,
+      `📦 ট্র্যাক করুন: ${trackUrl}`,
+    ];
+  }
+
+  // ── Out for Delivery ─────────────────────────────────────────────
+  if (newStatus === "Out for Delivery") {
+    const soon     = noteHas(n, "ঘণ্টা", "hrs", "hour", "soon");
+    const tomorrow = noteHas(n, "আগামীকাল", "tomorrow");
+
+    const timeMsg = tomorrow
+      ? `আগামীকাল সকালে ডেলিভারি হবে ইনশাআল্লাহ।`
+      : soon
+      ? `আজ ১–২ ঘণ্টার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`
+      : `আজকে সন্ধ্যার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`;
+
+    return [
+      greeting, ``,
       `🏍️ *আপনার ডেলিভারি রওনা দিয়েছে!*`,
       `আপনার আইটেম এখন পথে আছে।`,
       ``,
@@ -70,40 +167,79 @@ const buildWhatsAppMessage = (order, newStatus, statusNote) => {
       `📍 *ঠিকানা:* ${order.union}, ${order.wardArea}, ${order.villageBari}${order.landmark ? `, ${order.landmark}` : ""}`,
       `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
       ``,
-      `বাড়িতে থাকুন — আজকে সন্ধ্যার মধ্যে পৌঁছে যাবে ইনশাআল্লাহ।`,
+      `${timeMsg} বাড়িতে থাকুন।`,
       ``,
       `📦 ট্র্যাক করুন: ${trackUrl}`,
-    ],
+    ];
+  }
 
-    "Delivered": [
-      `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`,
-      ``,
+  // ── Delivered ────────────────────────────────────────────────────
+  if (newStatus === "Delivered") {
+    const askFeedback = noteHas(n, "ঠিকঠাক", "feedback", "জানালে");
+    const isPartial   = noteHas(n, "অংশ", "partial", "বাকি");
+
+    if (isPartial) {
+      return [
+        greeting, ``,
+        `📦 *আংশিক ডেলিভারি সম্পন্ন*`,
+        `আপনার "${order.itemName}"-এর একটি অংশ আজ পৌঁছে গেছে।`,
+        ``,
+        `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
+        ``,
+        `বাকি অংশ পরবর্তী রাউন্ডে পৌঁছে দেওয়া হবে।`,
+        `কোনো সমস্যা থাকলে এখনই জানান।`,
+      ];
+    }
+
+    return [
+      greeting, ``,
       `✅ *ডেলিভারি সম্পন্ন হয়েছে!*`,
-      `আপনার আইটেম পৌঁছে গেছে।`,
+      `আপনার "${order.itemName}" পৌঁছে গেছে।`,
       ``,
-      `🛒 *আইটেম:* ${order.itemName} (${order.brandName})`,
       `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
       ``,
-      `ZILO ব্যবহার করার জন্য ধন্যবাদ! 🙏`,
+      askFeedback
+        ? `সব কিছু ঠিকঠাক পেয়েছেন তো? একটু জানালে খুশি হই — এটা আমাদের সেবা উন্নত করতে সাহায্য করে। 🙏`
+        : `ZILO ব্যবহার করার জন্য ধন্যবাদ! 🙏`,
       `পরের বার আবার অর্ডার করুন: ${CLIENT_URL}`,
-    ],
+    ];
+  }
 
-    "Cancelled": [
-      `আস্সালামু আলাইকুম ${order.custName} ভাই/আপু! 👋`,
-      ``,
+  // ── Cancelled ────────────────────────────────────────────────────
+  if (newStatus === "Cancelled") {
+    if (isPaymentCancellation(order, statusNote)) {
+      return [
+        greeting, ``,
+        `❌ *অর্ডার বাতিল হয়েছে*`,
+        `দুঃখিত, আপনার পেমেন্ট যাচাই করা সম্ভব হয়নি — তাই অর্ডারটি বাতিল করতে হয়েছে।`,
+        ``,
+        `🛒 *আইটেম:* ${order.itemName} (${order.brandName})`,
+        `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
+        ``,
+        `যেহেতু পেমেন্ট কনফার্ম হয়নি, কোনো টাকা কাটা হয়নি।`,
+        `পুনরায় অর্ডার করতে সঠিক পেমেন্ট স্ক্রিনশট সহ আবার চেষ্টা করুন।`,
+        ``,
+        `🛒 নতুন অর্ডার: ${CLIENT_URL}`,
+      ];
+    }
+
+    // Payment was verified before cancel → refund applicable
+    return [
+      greeting, ``,
       `❌ *অর্ডার বাতিল হয়েছে*`,
       `দুঃখিত, আপনার অর্ডারটি বাতিল করতে হয়েছে।`,
       ``,
       `🛒 *আইটেম:* ${order.itemName} (${order.brandName})`,
       `🔖 *অর্ডার আইডি:* ${order.orderId}${note}`,
       ``,
-      `রিফান্ড সম্পর্কিত তথ্যের জন্য আমাদের সাথে যোগাযোগ করুন।`,
+      `আপনার ৳${order.amountPaid} রিফান্ড প্রক্রিয়া শুরু হয়েছে।`,
+      `রিফান্ড পেতে বা আরও তথ্যের জন্য আমাদের সাথে যোগাযোগ করুন।`,
       ``,
       `📦 ট্র্যাক করুন: ${trackUrl}`,
-    ],
-  };
+    ];
+  }
 
-  return messages[newStatus] || null;
+  return null;
 };
 
 const openWhatsApp = (order, newStatus, statusNote) => {
@@ -500,6 +636,32 @@ const AdminPage = () => {
                           <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--color-olive)] mb-2">
                             Update status
                           </p>
+
+                          {/* Cancel reason quick-pick — shown only when order isn't already cancelled */}
+                          {order.status !== "Cancelled" && order.status !== "Delivered" && (
+                            <div className="mb-3 p-3 bg-[#fff4f2] border border-[var(--color-brick)]">
+                              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--color-brick)] mb-2">
+                                Quick cancel reason (fills note below)
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {CANCEL_REASONS.map((r) => (
+                                  <button
+                                    key={r.label}
+                                    onClick={() =>
+                                      setStatusNotes((prev) => ({ ...prev, [order._id]: r.note }))
+                                    }
+                                    className={`px-2.5 py-1 text-[11px] font-semibold border transition-colors ${
+                                      statusNotes[order._id] === r.note
+                                        ? "bg-[var(--color-brick)] text-white border-[var(--color-brick)]"
+                                        : "bg-white text-[var(--color-ink)] border-[var(--color-line)] hover:border-[var(--color-brick)]"
+                                    }`}
+                                  >
+                                    {r.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Note field */}
                           <div className="mb-3">
