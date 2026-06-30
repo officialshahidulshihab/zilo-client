@@ -17,24 +17,9 @@ function formatRemaining(ms) {
 // ── Schedule strip — always visible, highlights the current slot ──────────────
 const ScheduleStrip = ({ phase }) => {
   const slots = [
-    {
-      key: "morning",
-      icon: "🟢",
-      time: "12 AM – 12 PM",
-      label: "Order → delivered today",
-    },
-    {
-      key: "midday-closed",
-      icon: "🏍️",
-      time: "12 PM – 6 PM",
-      label: "Out sourcing & delivering",
-    },
-    {
-      key: "evening",
-      icon: "🌙",
-      time: "6 PM – 12 AM",
-      label: "Order → delivered tomorrow",
-    },
+    { key: "morning",       icon: "🟢", time: "12 AM – 12 PM", label: "Order → delivered today" },
+    { key: "midday-closed", icon: "🏍️", time: "12 PM – 6 PM",  label: "Out sourcing & delivering" },
+    { key: "evening",       icon: "🌙", time: "6 PM – 12 AM",  label: "Order → delivered tomorrow" },
   ];
 
   return (
@@ -45,24 +30,14 @@ const ScheduleStrip = ({ phase }) => {
           <div
             key={slot.key}
             className={`px-1.5 py-2 text-center transition-colors ${
-              active
-                ? "bg-[var(--color-ink)] text-white rounded-sm"
-                : "text-[var(--color-olive)]"
+              active ? "bg-[var(--color-ink)] text-white rounded-sm" : "text-[var(--color-olive)]"
             }`}
           >
             <div className="text-[14px] mb-0.5">{slot.icon}</div>
-            <div
-              className={`font-mono text-[9.5px] font-bold tracking-wide uppercase ${
-                active ? "text-white" : "text-[var(--color-ink)]"
-              }`}
-            >
+            <div className={`font-mono text-[9.5px] font-bold tracking-wide uppercase ${active ? "text-white" : "text-[var(--color-ink)]"}`}>
               {slot.time}
             </div>
-            <div
-              className={`text-[10.5px] mt-0.5 leading-tight ${
-                active ? "text-white/80" : "text-[var(--color-olive)]"
-              }`}
-            >
+            <div className={`text-[10.5px] mt-0.5 leading-tight ${active ? "text-white/80" : "text-[var(--color-olive)]"}`}>
               {slot.label}
             </div>
           </div>
@@ -132,9 +107,7 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
           </div>
           {nextTransitionAt && (
             <div className="text-right shrink-0">
-              <p className="text-[10px] font-mono uppercase tracking-wide text-[#1e8449]">
-                Window closes in
-              </p>
+              <p className="text-[10px] font-mono uppercase tracking-wide text-[#1e8449]">Window closes in</p>
               <p className="font-mono text-[20px] font-bold text-[#145a32] tabular-nums leading-none">
                 {formatRemaining(remaining)}
               </p>
@@ -161,9 +134,7 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
         </p>
         {nextTransitionAt && (
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-[11px] text-[var(--color-olive)] font-mono uppercase tracking-wide">
-              Back in
-            </span>
+            <span className="text-[11px] text-[var(--color-olive)] font-mono uppercase tracking-wide">Back in</span>
             <span className="font-mono text-[18px] font-bold text-[var(--color-rust)] tabular-nums">
               {formatRemaining(remaining)}
             </span>
@@ -182,9 +153,7 @@ const OrderWindowBanner = ({ initialStatus, onStatusChange }) => {
           📅 NO SERVICE TODAY
         </span>
         <p className="text-[14px] font-semibold text-[var(--color-brick)]">
-          {hasCustomMessage
-            ? message
-            : "We're not running today — check back tomorrow."}
+          {hasCustomMessage ? message : "We're not running today — check back tomorrow."}
         </p>
         <p className="text-[12px] text-[var(--color-olive)] mt-1.5">
           Once we&apos;re back, the normal daily schedule applies:

@@ -7,7 +7,7 @@ import HowItWorks from "@/components/HowItWorks";
 import OrderForm from "@/components/OrderForm";
 
 // Shown in place of the order form when orders aren't being accepted
-const OrdersClosedCard = ({ phase, etaText }) => {
+const OrdersClosedCard = ({ phase }) => {
   const isMidday = phase === "midday-closed";
   return (
     <section className="mt-9">
@@ -25,11 +25,7 @@ const OrdersClosedCard = ({ phase, etaText }) => {
         }`}
       >
         <div className="text-4xl mb-3">{isMidday ? "🏍️" : "📅"}</div>
-        <p
-          className={`font-display text-[20px] mb-2 ${
-            isMidday ? "text-[var(--color-ink)]" : "text-[var(--color-brick)]"
-          }`}
-        >
+        <p className={`font-display text-[20px] mb-2 ${isMidday ? "text-[var(--color-ink)]" : "text-[var(--color-brick)]"}`}>
           {isMidday ? "We're out delivering right now." : "No service today."}
         </p>
         <p className="text-[13.5px] text-[var(--color-olive)] max-w-xs mx-auto">
@@ -53,13 +49,14 @@ const OrdersClosedCard = ({ phase, etaText }) => {
 const HomeClient = ({ status }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [liveStatus, setLiveStatus] = useState(status);
 
   const handleAgree = () => {
     setAgreed(true);
     setModalOpen(false);
   };
 
-  const acceptingOrders = status.isOpen && status.phase !== "midday-closed";
+  const acceptingOrders = liveStatus.isOpen && liveStatus.phase !== "midday-closed";
 
   return (
     <>
@@ -72,12 +69,14 @@ const HomeClient = ({ status }) => {
 
       <main className="bg-[var(--color-paper)] min-h-screen">
         <div className="max-w-xl mx-auto px-4 pb-16">
-          <Header status={status} />
+          {/* onStatusChange keeps this shell in sync with OrderWindowBanner's
+              own live refetch, so the form/closed-card swap happens the
+              instant the phase actually flips — no page reload needed. */}
+          <Header status={liveStatus} onStatusChange={setLiveStatus} />
           <HowItWorks />
 
           {acceptingOrders ? (
             <>
-              {/* Policy agreement trigger */}
               <section className="mt-9">
                 <p className="font-mono text-[11.5px] tracking-[0.14em] uppercase text-[var(--color-rust)] mb-1">
                   Read before ordering
@@ -114,13 +113,13 @@ const HomeClient = ({ status }) => {
               </section>
 
               <OrderForm
-                isOpen={status.isOpen}
-                etaText={status.etaText}
+                isOpen={liveStatus.isOpen}
+                etaText={liveStatus.etaText}
                 agreedFromOutside={agreed}
               />
             </>
           ) : (
-            <OrdersClosedCard phase={status.phase} etaText={status.etaText} />
+            <OrdersClosedCard phase={liveStatus.phase} />
           )}
         </div>
       </main>

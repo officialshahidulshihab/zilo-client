@@ -1,6 +1,6 @@
 import OrderWindowBanner from "./OrderWindowBanner";
 
-const Header = ({ status }) => {
+const Header = ({ status, onStatusChange }) => {
   return (
     <header className="pt-7 pb-5 border-b-[3px] border-[var(--color-ink)]">
       <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[var(--color-olive)] mb-2">
@@ -18,7 +18,7 @@ const Header = ({ status }) => {
         </div>
       </div>
 
-      <OrderWindowBanner initialStatus={status} />
+      <OrderWindowBanner initialStatus={status} onStatusChange={onStatusChange} />
     </header>
   );
 };
