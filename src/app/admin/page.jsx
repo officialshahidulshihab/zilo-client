@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 
-const SERVER = process.env.NODE_ENV === "production" ? "https://zilo-server.vercel.app" : "http://localhost:5000";
+const SERVER =
+  process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
 const CLIENT_URL =
   process.env.NEXT_PUBLIC_CLIENT_URL || "http://localhost:3000";
 
@@ -505,13 +506,11 @@ const AdminPage = () => {
     const next = !serviceStatus.isOpen;
     try {
       const res = await fetch(`${SERVER}/api/admin/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-key": ADMIN_KEY,
-        },
-        body: JSON.stringify({ isOpen: next, message: offMessage }),
-      });
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ isOpen: next, message: offMessage }),
+});
       if (!res.ok) throw new Error(await res.text());
       setServiceStatus((s) => ({ ...s, isOpen: next }));
       toast.success(next ? "Service is now open." : "Service paused.");
@@ -524,16 +523,11 @@ const AdminPage = () => {
   const saveOffMessage = async () => {
     try {
       const res = await fetch(`${SERVER}/api/admin/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-key": ADMIN_KEY,
-        },
-        body: JSON.stringify({
-          isOpen: serviceStatus.isOpen,
-          message: offMessage,
-        }),
-      });
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ isOpen: serviceStatus.isOpen, message: offMessage }),
+});
       if (!res.ok) throw new Error(await res.text());
       setServiceStatus((s) => ({ ...s, message: offMessage }));
       toast.success("Message saved.");

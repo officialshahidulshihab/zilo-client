@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const SERVER = process.env.NODE_ENV === "production" ? "https://zilo-server.vercel.app" : "http://localhost:5000";
+const SERVER = process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
 
 function formatRemaining(ms) {
   if (ms <= 0) return "00:00:00";

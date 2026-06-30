@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const SERVER = process.env.NODE_ENV === "production" ? "https://zilo-server.vercel.app" : "http://localhost:5000";
+const SERVER = process.env.NODE_ENV === "production" ? "" : "http://localhost:5000";
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "01866996873";
 const BKASH_NAGAD = "01866996873";
 
