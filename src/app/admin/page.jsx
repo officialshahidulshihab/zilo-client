@@ -4,10 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "";
-const STORAGE_KEY = "zilo_admin_authed";
 const CLIENT_URL =
   process.env.NEXT_PUBLIC_CLIENT_URL || "http://localhost:3000";
+
+// NOTE: the admin key no longer lives here. It's checked once, server-side,
+// at POST /api/admin/login — the browser only ever holds an httpOnly
+// session cookie afterward, which JS can't read and which isn't shipped
+// in any bundle. See index.js for the session logic.
 
 const STATUSES = [
   "Order Received",
@@ -339,25 +342,57 @@ const AdminPage = () => {
   const [authed, setAuthed] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [key, setKey] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "true") setAuthed(true);
-    setAuthChecked(true);
+    // On load, ask the server whether the existing session cookie (if any)
+    // is still valid — replaces the old localStorage flag, since the real
+    // proof of auth now lives in an httpOnly cookie the page can't read.
+    (async () => {
+      try {
+        const res = await fetch(`${SERVER}/api/admin/me`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setAuthed(!!data.authed);
+      } catch {
+        setAuthed(false);
+      }
+      setAuthChecked(true);
+    })();
   }, []);
 
-  const handleLogin = () => {
-    if (key === ADMIN_KEY) {
-      localStorage.setItem(STORAGE_KEY, "true");
-      setAuthed(true);
-      toast.success("Welcome, operator.");
-    } else {
-      toast.error("Wrong key.");
+  const handleLogin = async () => {
+    setLoggingIn(true);
+    try {
+      const res = await fetch(`${SERVER}/api/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // required to receive the session cookie
+        body: JSON.stringify({ key }),
+      });
+      if (res.ok) {
+        setAuthed(true);
+        setKey("");
+        toast.success("Welcome, operator.");
+      } else {
+        toast.error("Wrong key.");
+      }
+    } catch {
+      toast.error("Couldn't reach the server. Try again.");
     }
+    setLoggingIn(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem(STORAGE_KEY);
+  const handleLogout = async () => {
+    try {
+      await fetch(`${SERVER}/api/admin/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // even if this fails, drop local auth state below
+    }
     setAuthed(false);
     setKey("");
   };
@@ -388,16 +423,15 @@ const AdminPage = () => {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const headers = { "x-admin-key": ADMIN_KEY };
-
       const [ordersRes, statsRes, statusRes] = await Promise.all([
-        fetch(`${SERVER}/api/admin/orders`, { headers }),
-        fetch(`${SERVER}/api/admin/stats`, { headers }),
+        fetch(`${SERVER}/api/admin/orders`, { credentials: "include" }),
+        fetch(`${SERVER}/api/admin/stats`, { credentials: "include" }),
         fetch(`${SERVER}/api/status`),
       ]);
 
       if (ordersRes.status === 403) {
-        toast.error("Admin key rejected. Check your .env files.");
+        toast.error("Session expired. Please log in again.");
+        setAuthed(false);
         setLoading(false);
         return;
       }
@@ -437,10 +471,8 @@ const AdminPage = () => {
         `${SERVER}/api/admin/orders/${order._id}/status`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "x-admin-key": ADMIN_KEY,
-          },
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ status: newStatus, statusNote: note }),
         },
       );
