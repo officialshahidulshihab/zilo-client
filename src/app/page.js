@@ -1,6 +1,6 @@
 import HomeClient from "@/components/HomeClient";
 
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+const SERVER = process.env.NODE_ENV === "production" ? "https://zilo-server.vercel.app" : "http://localhost:5000";
 
 async function getServiceStatus() {
   try {
