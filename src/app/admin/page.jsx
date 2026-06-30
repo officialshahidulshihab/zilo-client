@@ -346,14 +346,9 @@ const AdminPage = () => {
   const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
-    // On load, ask the server whether the existing session cookie (if any)
-    // is still valid — replaces the old localStorage flag, since the real
-    // proof of auth now lives in an httpOnly cookie the page can't read.
     (async () => {
       try {
-        const res = await fetch(`${SERVER}/api/admin/me`, {
-          credentials: "include",
-        });
+        const res = await fetch(`/api/admin/me`);
         const data = await res.json();
         setAuthed(!!data.authed);
       } catch {
@@ -366,10 +361,9 @@ const AdminPage = () => {
   const handleLogin = async () => {
     setLoggingIn(true);
     try {
-      const res = await fetch(`${SERVER}/api/admin/login`, {
+      const res = await fetch(`/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // required to receive the session cookie
         body: JSON.stringify({ key }),
       });
       if (res.ok) {
@@ -387,12 +381,9 @@ const AdminPage = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${SERVER}/api/admin/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await fetch(`/api/admin/logout`, { method: "POST" });
     } catch {
-      // even if this fails, drop local auth state below
+      // drop local state regardless
     }
     setAuthed(false);
     setKey("");
@@ -425,8 +416,8 @@ const AdminPage = () => {
     setLoading(true);
     try {
       const [ordersRes, statsRes, statusRes] = await Promise.all([
-        fetch(`${SERVER}/api/admin/orders`, { credentials: "include" }),
-        fetch(`${SERVER}/api/admin/stats`, { credentials: "include" }),
+        fetch(`/api/admin/orders`),
+        fetch(`/api/admin/stats`),
         fetch(`${SERVER}/api/status`),
       ]);
 
@@ -468,15 +459,11 @@ const AdminPage = () => {
     setUpdatingId(order._id);
 
     try {
-      const res = await fetch(
-        `${SERVER}/api/admin/orders/${order._id}/status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ status: newStatus, statusNote: note }),
-        },
-      );
+      const res = await fetch(`/api/admin/orders/${order._id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus, statusNote: note }),
+      });
       if (!res.ok) throw new Error(await res.text());
 
       setOrders((prev) =>
@@ -505,12 +492,11 @@ const AdminPage = () => {
   const toggleService = async () => {
     const next = !serviceStatus.isOpen;
     try {
-      const res = await fetch(`${SERVER}/api/admin/status`, {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({ isOpen: next, message: offMessage }),
-});
+      const res = await fetch(`/api/admin/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isOpen: next, message: offMessage }),
+      });
       if (!res.ok) throw new Error(await res.text());
       setServiceStatus((s) => ({ ...s, isOpen: next }));
       toast.success(next ? "Service is now open." : "Service paused.");
@@ -522,12 +508,11 @@ const AdminPage = () => {
 
   const saveOffMessage = async () => {
     try {
-      const res = await fetch(`${SERVER}/api/admin/status`, {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",
-  body: JSON.stringify({ isOpen: serviceStatus.isOpen, message: offMessage }),
-});
+      const res = await fetch(`/api/admin/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isOpen: serviceStatus.isOpen, message: offMessage }),
+      });
       if (!res.ok) throw new Error(await res.text());
       setServiceStatus((s) => ({ ...s, message: offMessage }));
       toast.success("Message saved.");
