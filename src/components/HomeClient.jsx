@@ -13,7 +13,6 @@ import SocialProof from "@/components/SocialProof";
 import AboutSection from "@/components/AboutSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 const SERVICES = [
   {
@@ -122,11 +121,7 @@ const HomeClient = ({ status }) => {
 
   return (
     <>
-      <FloatingWhatsApp />
-
-      <main className="bg-[var(--color-paper)] min-h-screen">
-        {/* Navbar is rendered in layout, but if not, include here */}
-
+      <main className="bg-[var(--color-paper)] min-h-screen flex-grow">
         <div className="max-w-xl mx-auto px-4 pb-16">
 
           {/* 1 — Hero */}

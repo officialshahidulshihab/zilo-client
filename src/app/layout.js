@@ -1,7 +1,8 @@
-// layout.js
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Navbar from "@/components/Navbar";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 export const metadata = {
   title: "ZILO — Same-day Delivery, Noapara ⇄ Pahartali",
@@ -18,8 +19,10 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body className="bg-[var(--color-paper)] text-[var(--color-ink)] min-h-screen flex flex-col">
+        <Navbar />
         {children}
+        <FloatingWhatsApp />
         <ToastContainer position="top-center" />
       </body>
     </html>
