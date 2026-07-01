@@ -2,25 +2,25 @@ import Link from "next/link";
 
 const ServiceCard = ({ icon, serviceName, headline, body, hours, paymentNote, ctaLabel, ctaHref }) => {
   return (
-    <div className="border-2 border-[var(--color-ink)] bg-[var(--color-paper)] flex flex-col hover:bg-[var(--color-kraft)] transition-colors">
-      <div className="p-4 flex-1">
+    <div className="border-2 border-[var(--color-ink)] bg-[var(--color-paper)] flex flex-col h-full hover:bg-[var(--color-kraft)] transition-colors">
+      <div className="p-4 flex flex-col flex-1">
         <div className="text-3xl mb-3">{icon}</div>
         <p className="font-mono text-[10px] tracking-[0.14em] uppercase text-[var(--color-rust)] mb-1">
           {serviceName}
         </p>
         <h3
-          className="text-[17px] font-bold text-[var(--color-ink)] leading-snug mb-2"
+          className="text-[17px] font-bold text-[var(--color-ink)] leading-snug mb-2 min-h-[44px]"
           style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
         >
           {headline}
         </h3>
         <p
-          className="text-[13px] text-[var(--color-olive)] leading-relaxed mb-3"
+          className="text-[13px] text-[var(--color-olive)] leading-relaxed mb-4 flex-1"
           style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
         >
           {body}
         </p>
-        <div className="border-t border-dashed border-[var(--color-line)] pt-3 space-y-1">
+        <div className="border-t border-dashed border-[var(--color-line)] pt-3 mt-auto space-y-1">
           <p className="font-mono text-[10px] text-[var(--color-olive)]">🕐 {hours}</p>
           <p className="font-mono text-[10px] text-[var(--color-olive)]">💳 {paymentNote}</p>
         </div>
