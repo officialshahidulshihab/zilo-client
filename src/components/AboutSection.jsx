@@ -12,12 +12,12 @@ export default function AboutSection() {
       </h2>
 
       <div className="flex flex-col md:flex-row gap-6 items-start">
-        {/* Placeholder Photo Slot */}
-        <div className="w-full md:w-1/3 aspect-[4/3] md:aspect-square bg-[var(--color-kraft)] border-2 border-[var(--color-ink)] flex items-center justify-center shrink-0 p-4 text-center">
+        {/* ZILO Brand Logo Block */}
+        <div className="w-full md:w-1/3 aspect-[4/3] md:aspect-square bg-[var(--color-ink)] border-2 border-[var(--color-ink)] flex items-center justify-center shrink-0 p-4 text-center">
           <div>
-            <span className="text-4xl block mb-2">📸</span>
-            <p className="text-[12px] font-mono text-[var(--color-olive)] uppercase tracking-wide">
-              [ Owner Photo Placeholder ]
+            <span className="text-5xl block mb-3 font-display text-[var(--color-kraft)] tracking-widest">ZILO</span>
+            <p className="text-[11px] font-mono text-[var(--color-kraft)] opacity-80 uppercase tracking-widest">
+              LOCAL DELIVERY
             </p>
           </div>
         </div>
@@ -28,7 +28,7 @@ export default function AboutSection() {
             className="text-[15px] leading-relaxed text-[var(--color-ink)] font-medium"
             style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
           >
-            "আমরা নোয়াপাড়ার ছেলে। শহরে যাওয়া সবার পক্ষে সবসময় সম্ভব হয় না — সেই কথা মাথায় রেখেই ZILO শুরু করেছি। আমাদের তিনটি সার্ভিস, তিন ভাই মিলে চালাই — প্রতিটি ডেলিভারি আমাদের কাছে একটি মানুষের সমস্যার সমাধান।"
+            "ZILO একটি লোকাল ডেলিভারি এবং পার্সেল সার্ভিস যা নোয়াপাড়া, বাগুয়ান এবং পাহাড়তলী এলাকার মানুষের দৈনন্দিন প্রয়োজন মেটাতে কাজ করছে। শহরে গিয়ে কেনাকাটা করার সময় যাদের নেই, তাদের জন্য আমাদের এই উদ্যোগ। প্রতিটি অর্ডারের গুরুত্ব আমরা বুঝি এবং দ্রুত ও নিরাপদে আপনার পণ্য পৌঁছে দিতে আমরা প্রতিশ্রুতিবদ্ধ।"
           </p>
 
           <div className="grid grid-cols-2 gap-4 mt-6">

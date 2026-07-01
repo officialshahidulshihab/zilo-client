@@ -2,7 +2,7 @@ const SCENARIOS = [
   { emoji: "🎓", text: "পরীক্ষার আগের দিন স্টেশনারি শেষ — বের হওয়ার সময় নেই", service: "Express" },
   { emoji: "💊", text: "ওষুধ দরকার এখনই — কিন্তু বাড়ি থেকে বের হওয়া যাচ্ছে না", service: "Express" },
   { emoji: "🏠", text: "মেহমান আসছে, বাজার করতে পারিনি — এখন কি হবে?", service: "Express" },
-  { emoji: "📱", text: "Daraz-এ পছন্দের জিনিস দেখলাম — আজই চাই", service: "Source" },
+  { emoji: "🛍️", text: "শহর থেকে পছন্দের জিনিস আনতে হবে — আজই চাই", service: "Source" },
   { emoji: "📦", text: "পাহাড়তলীতে কাউকে জিনিস পাঠাতে হবে", service: "Parcel" },
 ];
 
@@ -28,7 +28,7 @@ const ScenariosSection = () => {
         className="text-[13.5px] text-[var(--color-olive)] mb-5"
         style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
       >
-        যখন দরকার কিন্তু যাওয়া সম্ভব না — তখনই ZILO
+        এখন দরকার কিন্তু যাওয়ার সময় নেই — তখনই ZILO
       </p>
 
       <div className="space-y-2.5">

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import OrderWindowBanner from "@/components/OrderWindowBanner";
 import ServiceCard from "@/components/ServiceCard";
 import ScenariosSection from "@/components/ScenariosSection";
 import HowItWorks from "@/components/HowItWorks";
@@ -126,9 +125,6 @@ const HomeClient = ({ status }) => {
 
           {/* 1 — Hero */}
           <HeroSection />
-
-          {/* 2 — Live Order Window Banner */}
-          <OrderWindowBanner initialStatus={liveStatus} onStatusChange={setLiveStatus} />
 
           {/* 3 — Service Cards */}
           <section className="mt-10">

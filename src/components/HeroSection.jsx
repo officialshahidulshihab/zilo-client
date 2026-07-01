@@ -8,14 +8,14 @@ const HeroSection = () => {
         className="text-[clamp(32px,9vw,56px)] font-bold text-[var(--color-ink)] leading-[1.15] mb-4"
         style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
       >
-        শহরে যেতে পারছেন না?
+        শহর থেকে কিছু লাগবে? <br/> বা পার্সেল পাঠাবেন?
       </h1>
       <p
         className="text-[clamp(17px,4.5vw,22px)] text-[var(--color-ink)] font-semibold leading-[1.5] mb-5 max-w-sm"
         style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
       >
-        আমরা যাচ্ছি। আপনার জন্য কিনে,{" "}
-        <span className="text-[var(--color-rust)]">আপনার দরজায় পৌঁছে দিই।</span>
+        আপনার যা দরকার, আমরা নিয়ে আসছি। <br/>
+        <span className="text-[var(--color-rust)]">লোকাল ডেলিভারি ও পার্সেল সার্ভিস — দ্রুত এবং বিশ্বস্ত।</span>
       </p>
       <p
         className="text-[14px] text-[var(--color-olive)] border-l-[3px] border-[var(--color-rust)] pl-3"

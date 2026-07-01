@@ -66,7 +66,7 @@ const PolicyModal = ({ open, onAgree, onClose, alreadyAgreedBefore }) => {
 
           <PolicySection title="Approval, substitutes & cancellations">
             <PolicyItem>We never buy anything before you approve a photo on WhatsApp. No reply within a reasonable time means the order is automatically cancelled.</PolicyItem>
-            <PolicyItem>Once we start actively sourcing your order, the booking fee is non-refundable — even if you change your mind — since that covers the time and effort already spent finding it.</PolicyItem>
+            <PolicyItem>Once we start actively sourcing your order, the booking fee is non-refundable — even if you change your mind — since that covers the time and effort already spent finding it (a ৳50 cancellation fee will be deducted).</PolicyItem>
             <PolicyItem>If your exact item isn't available, we'll call you with the closest alternative we found. Accept it, or cancel for a full deposit refund.</PolicyItem>
           </PolicySection>
 
