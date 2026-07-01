@@ -17,6 +17,7 @@
   --color-muted-foreground: #4A4A42;
   --color-border: #cfc4a8;
   --color-card: #EDE5D3;
+  --font-bangla: "Hind Siliguri", sans-serif;
 }
 
 .dark {
@@ -47,6 +48,7 @@
   --font-mono: "IBM Plex Mono", monospace;
   --font-display: "Special Elite", monospace;
   --font-sans: "IBM Plex Sans", sans-serif;
+   --font-bangla: var(--font-bangla);
 }
 
 body {
